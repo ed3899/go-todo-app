@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  gotodomysql:
+    image: go-todo-mysql
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - 8080:8080
+    networks:
+      - go-todo-network
+  mysql_db:
+    image: mysql:latest
+    ports:
+      - 3306:3306
+    env_file:
+      - db.env
+    networks:
+      - go-todo-network
