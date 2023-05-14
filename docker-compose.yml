@@ -1,15 +1,6 @@
 version: '3.8'
 
 services:
-  gotodomysql:
-    image: go-todo-mysql
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-    ports:
-      - 8080:8080
-    networks:
-      - go-todo-network
   mysql_db:
     image: mysql:latest
     ports:
@@ -18,3 +9,30 @@ services:
       - db.env
     networks:
       - go-todo-network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mysql go-todo-db --password=my-secret-pw --port=3306"
+        ]
+      interval: 30s
+      retries: 5
+      timeout: 20s
+      start_period: 1m
+  gotodomysql:
+    image: go-todo-mysql
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - 8080:8080
+    env_file:
+      - .env
+    networks:
+      - go-todo-network
+    depends_on:
+      mysql_db:
+        condition: "service_healthy"
+networks:
+  go-todo-network:
+    name: go-todo-network

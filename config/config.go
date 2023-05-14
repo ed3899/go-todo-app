@@ -3,16 +3,9 @@ package config
 import (
 	"log"
 	"os"
-
-	"github.com/joho/godotenv"
 )
 
 func Config(key string) string {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatalf("Could not load environment file. Error: %v", err)
-	}
-
 	var (
 		env_value string
 	)
