@@ -35,6 +35,7 @@ func ConnectDB() {
 		Passwd: db_password,
 		DBName: db_name,
 		Net:    "tcp",
+		AllowNativePasswords: true,
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
