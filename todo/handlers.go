@@ -54,6 +54,20 @@ func (handler *TodoHandler) Get(c *fiber.Ctx) error {
 	return c.JSON(todo)
 }
 
+func (handler *TodoHandler) GetAll(c *fiber.Ctx) error {
+	todos, err := handler.repository.FindAll()
+	if err != nil {
+		err := fmt.Errorf("there was an error while finding all todos: %#v", err)
+		return c.Status(500).JSON(fiber.Map{
+			"error": err,
+		})
+	}
+
+	log.Printf("from get all handler %#v", todos)
+
+	return c.Status(200).JSON(todos)
+}
+
 func NewTodoHandler(repository *TodoRepository) *TodoHandler {
 	return &TodoHandler{
 		repository,
@@ -66,5 +80,6 @@ func Register(router fiber.Router, database *sql.DB) {
 
 	todoRouter := router.Group("/todo")
 	todoRouter.Get("/:id", todoHandler.Get)
+	todoRouter.Get("/", todoHandler.GetAll)
 	todoRouter.Post("/", todoHandler.Create)
 }

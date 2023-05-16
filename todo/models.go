@@ -18,7 +18,7 @@ type Todo struct {
 }
 
 type TodoResponse struct {
-	TodoId interface{} `json:",omitempty"`
+	TodoId int64 `json:",omitempty"`
 	Todo
 }
 
@@ -36,13 +36,13 @@ func (repository *TodoRepository) Create(todo Todo) (TodoResponse, error) {
 	result, err := repository.database.Exec("INSERT INTO todos (Name, Status) VALUES(?, ?);", todo.Name, todo.Status)
 	if err != nil {
 		err := fmt.Errorf("there was an error while inserting the todo '%#v'. The cause was: %v", todo, err)
-		return TodoResponse{nil, todo}, err
+		return TodoResponse{0, todo}, err
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
 		err := fmt.Errorf("there was an error while retrieving the inserted id of todo: %#v. The cause was: %v", todo, err)
-		return TodoResponse{nil, todo}, err
+		return TodoResponse{0, todo}, err
 	}
 
 	log.Printf("%#v succesfully inserted", todo)
@@ -72,4 +72,36 @@ func (repository *TodoRepository) Find(id int) (TodoResponse, error) {
 
 		return todo, nil
 	}
+}
+
+func (repository *TodoRepository) FindAll() ([]TodoResponse, error) {
+	// get rows from db
+	sqlQuery := `
+	SELECT * FROM todos;
+	`
+	rows, err := repository.database.Query(sqlQuery)
+	if err != nil {
+		return []TodoResponse{}, nil
+	}
+	defer rows.Close()
+
+	// iterate through rows and fill todo array
+	var todoResponses []TodoResponse
+	for rows.Next() {
+		var todoResponse TodoResponse
+		if err := rows.Scan(&todoResponse.TodoId, &todoResponse.Name, &todoResponse.Status); err != nil {
+			err := fmt.Errorf("there was an error scanning the row. Cause: %#v", err)
+			log.Print(err)
+			return todoResponses, err
+		}
+		todoResponses = append(todoResponses, todoResponse)
+	}
+
+	if err = rows.Err(); err != nil {
+		err := fmt.Errorf("an error was encountered during the iteration: %#v", err)
+		return todoResponses, err
+	}
+
+	// return todo array if no errors before
+	return todoResponses, nil
 }
