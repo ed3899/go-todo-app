@@ -2,7 +2,9 @@ package todo
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -26,11 +28,30 @@ func (handler *TodoHandler) Create(c *fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{
 			"status": 400,
 			"message": "Failed creating item",
-			"error": err,
+			"error":   err,
 		})
 	}
 
 	return c.Status(201).JSON(item)
+}
+
+func (handler *TodoHandler) Get(c *fiber.Ctx) error {
+	id, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		err := fmt.Errorf("there was an error parsing the parameter id: %v. Cause is: %#v", id, err)
+		return c.Status(400).JSON(fiber.Map{
+			"error": err,
+		})
+	}
+
+	todo, err := handler.repository.Find(id)
+	if err != nil {
+		return c.Status(404).JSON(fiber.Map{
+			"error": err,
+		})
+	}
+
+	return c.JSON(todo)
 }
 
 func NewTodoHandler(repository *TodoRepository) *TodoHandler {
@@ -39,10 +60,11 @@ func NewTodoHandler(repository *TodoRepository) *TodoHandler {
 	}
 }
 
-func Register(router fiber.Router, database *sql.DB)  {
+func Register(router fiber.Router, database *sql.DB) {
 	todoRepository := NewTodoRepository(database)
 	todoHandler := NewTodoHandler(todoRepository)
 
 	todoRouter := router.Group("/todo")
+	todoRouter.Get("/:id", todoHandler.Get)
 	todoRouter.Post("/", todoHandler.Create)
 }

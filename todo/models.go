@@ -37,3 +37,29 @@ func (repository *TodoRepository) Create(todo Todo) (Todo, error) {
 	log.Printf("%#v succesfully inserted", todo)
 	return Todo{todo.Name, todo.Status}, nil
 }
+
+func (repository *TodoRepository) Find(id int) (Todo, error) {
+	var todo Todo
+	var extra string
+	sqlQuery := `
+	SELECT * FROM todos
+	WHERE TodoId = ?;
+	`
+
+	switch err := repository.database.QueryRow(sqlQuery, id).Scan(&extra ,&todo.Name, &todo.Status); {
+	case err == sql.ErrNoRows:
+		err := fmt.Errorf("the todo with id: %d was not found", id)
+		log.Print(err)
+
+		return Todo{}, err
+	case err != nil:
+		err := fmt.Errorf("something bad happened while looking for Todo with id:%d which has structure %#v. Cause: %v", id, todo, err)
+		log.Print(err)
+
+		return Todo{}, err
+	default:
+		log.Printf("Sending %#v to requester", todo)
+
+		return todo, nil
+	}
+}
