@@ -106,6 +106,23 @@ func (handler *TodoHandler) Update(c *fiber.Ctx) error {
 	return c.JSON(item)
 }
 
+func (handler *TodoHandler) Delete(c *fiber.Ctx) error {
+	id, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		err := fmt.Errorf("there was an error while parsing your request. Cause: %#v", err)
+		return c.Status(400).JSON(fiber.Map{
+			"error": err,
+		})
+	}
+
+	rows_deleted := handler.repository.Delete(id)
+
+	return c.Status(200).JSON(fiber.Map{
+		"todoId":       id,
+		"rows_deleted": rows_deleted,
+	})
+}
+
 func NewTodoHandler(repository *TodoRepository) *TodoHandler {
 	return &TodoHandler{
 		repository,
@@ -121,4 +138,5 @@ func Register(router fiber.Router, database *sql.DB) {
 	todoRouter.Get("/", todoHandler.GetAll)
 	todoRouter.Post("/", todoHandler.Create)
 	todoRouter.Put("/:id", todoHandler.Update)
+	todoRouter.Delete("/:id", todoHandler.Delete)
 }

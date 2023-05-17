@@ -128,3 +128,23 @@ func (repository *TodoRepository) Save(todoResponse TodoResponse) (TodoResponse,
 		return TodoResponse{}, err
 	}
 }
+
+func (repository *TodoRepository) Delete(id int) int64 {
+	sqlQuery := `
+	DELETE FROM todos
+	WHERE TodoId = ?
+	`
+	result, err := repository.database.Exec(sqlQuery, id)
+	if err != nil {
+		err := fmt.Errorf("there was an error deleting the todo with id: %d", id)
+		log.Println(err)
+		return 0
+	}
+
+	rows_affected, err := result.RowsAffected()
+	if err != nil {
+		log.Printf("there was an error retrieving the rows affected: %#v", err)
+	}
+
+	return rows_affected
+}
