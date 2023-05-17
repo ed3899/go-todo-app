@@ -9,12 +9,15 @@ Make sure you are the root of the project directory.
 `docker compose up -d`
 
 # Development
-This area is mostly for describing the VM environment during the development of this
+This area is mostly for describing the VM environment used during the development of this
 project.
 
-Extensions in VSCode, to facilitate the dev experience, were easier to setup with Vagrant networking (SSH Remote Work, MySQL) in comparison to Docker.
 ## Requirements
-- MySQL 8.0
+- MySQL 8.0.33
 - Go 1.20.4
+
+## Optional VS Code Extensions
+- Remote - SSH (ms-vscode-remote.remote-ssh) / Connect to a VM or WSL
+- MySQL (formulahendry.vscode-mysql) / Visualize your database and queries
 ## How-To
 `./dev_run.sh`
