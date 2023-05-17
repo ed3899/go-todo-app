@@ -25,10 +25,9 @@ func (handler *TodoHandler) Create(c *fiber.Ctx) error {
 	item, err := handler.repository.Create(*data)
 
 	if err != nil {
+		err := fmt.Errorf("there was an error while creating the item: %#v", err)
 		return c.Status(400).JSON(fiber.Map{
-			"status": 400,
-			"message": "Failed creating item",
-			"error":   err,
+			"error":   err.Error(),
 		})
 	}
 
@@ -40,14 +39,14 @@ func (handler *TodoHandler) Get(c *fiber.Ctx) error {
 	if err != nil {
 		err := fmt.Errorf("there was an error parsing the parameter id: %v. Cause is: %#v", id, err)
 		return c.Status(400).JSON(fiber.Map{
-			"error": err,
+			"error": err.Error(),
 		})
 	}
 
 	todo, err := handler.repository.Find(id)
 	if err != nil {
 		return c.Status(404).JSON(fiber.Map{
-			"error": err,
+			"error": err.Error(),
 		})
 	}
 
@@ -59,7 +58,7 @@ func (handler *TodoHandler) GetAll(c *fiber.Ctx) error {
 	if err != nil {
 		err := fmt.Errorf("there was an error while finding all todos: %#v", err)
 		return c.Status(500).JSON(fiber.Map{
-			"error": err,
+			"error": err.Error(),
 		})
 	}
 
@@ -73,7 +72,7 @@ func (handler *TodoHandler) Update(c *fiber.Ctx) error {
 	if err != nil {
 		err := fmt.Errorf("there was an error while parsing your request. Cause: %#v", err)
 		return c.Status(400).JSON(fiber.Map{
-			"error": err,
+			"error": err.Error(),
 		})
 	}
 
@@ -111,7 +110,7 @@ func (handler *TodoHandler) Delete(c *fiber.Ctx) error {
 	if err != nil {
 		err := fmt.Errorf("there was an error while parsing your request. Cause: %#v", err)
 		return c.Status(400).JSON(fiber.Map{
-			"error": err,
+			"error": err.Error(),
 		})
 	}
 
