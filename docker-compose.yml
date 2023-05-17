@@ -2,9 +2,10 @@ version: '3.8'
 
 services:
   mysql_db:
-    image: mysql:latest
-    ports:
-      - 3306:3306
+    image: my_local_sql
+    build:
+      context: .
+      dockerfile: ./mysql.Dockerfile
     env_file:
       - db.env
     networks:
