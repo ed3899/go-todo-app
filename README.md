@@ -6,7 +6,8 @@ This area shows how to run a simple demo of the project.
 ## How-To
 Make sure you are the root of the project directory.
 
-`docker compose up`
+`docker compose up -d`
+
 # Development
 This area is mostly for describing the VM environment during the development of this
 project.
