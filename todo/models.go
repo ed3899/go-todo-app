@@ -105,3 +105,26 @@ func (repository *TodoRepository) FindAll() ([]TodoResponse, error) {
 	// return todo array if no errors before
 	return todoResponses, nil
 }
+
+func (repository *TodoRepository) Save(todoResponse TodoResponse) (TodoResponse, error) {
+	sqlQuery := `
+	UPDATE todos
+	SET Status = ?, Name = ?
+	WHERE TodoId = ?;
+	`
+	result, err := repository.database.Exec(sqlQuery, todoResponse.Status, todoResponse.Name, todoResponse.TodoId)
+	if err != nil {
+		err := fmt.Errorf("couldn't process your request. Cause: %#v", err)
+		return TodoResponse{}, err
+	}
+
+	switch rows_affected, err := result.RowsAffected(); {
+	case err == nil:
+		log.Printf("Number of rows affected: %d\n", rows_affected)
+		log.Printf("Succesfully updated: %#v\n", todoResponse)
+		return todoResponse, nil
+	default:
+		err := fmt.Errorf("an unexpected error happened: %#v. number of rows affected: %#v", err, rows_affected)
+		return TodoResponse{}, err
+	}
+}

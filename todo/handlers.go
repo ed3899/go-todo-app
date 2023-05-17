@@ -68,6 +68,44 @@ func (handler *TodoHandler) GetAll(c *fiber.Ctx) error {
 	return c.Status(200).JSON(todos)
 }
 
+func (handler *TodoHandler) Update(c *fiber.Ctx) error {
+	id, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		err := fmt.Errorf("there was an error while parsing your request. Cause: %#v", err)
+		return c.Status(400).JSON(fiber.Map{
+			"error": err,
+		})
+	}
+
+	todo, err := handler.repository.Find(id)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	todoData := new(Todo)
+
+	if err := c.BodyParser(todoData); err != nil {
+		err := fmt.Errorf("there was an error while parsing your request. Cause: %#v", err)
+		return c.Status(400).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	todo.Name = todoData.Name
+	todo.Status = todoData.Status
+
+	item, err := handler.repository.Save(todo)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.JSON(item)
+}
+
 func NewTodoHandler(repository *TodoRepository) *TodoHandler {
 	return &TodoHandler{
 		repository,
@@ -82,4 +120,5 @@ func Register(router fiber.Router, database *sql.DB) {
 	todoRouter.Get("/:id", todoHandler.Get)
 	todoRouter.Get("/", todoHandler.GetAll)
 	todoRouter.Post("/", todoHandler.Create)
+	todoRouter.Put("/:id", todoHandler.Update)
 }
